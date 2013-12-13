@@ -3,25 +3,17 @@
 Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        'AddHandler Fiddler.FiddlerApplication.OnNotification, AddressOf FiddlerApplication_OnNotification
-        'AddHandler Fiddler.FiddlerApplication.Log.OnLogString, AddressOf Log_OnLogString
-        AddHandler Fiddler.FiddlerApplication.AfterSessionComplete, AddressOf FiddlerApplication_AfterSessionComplete
+        AddHandler Fiddler.FiddlerApplication.BeforeResponse, AddressOf FiddlerApplication_AfterSessionComplete
         Fiddler.CONFIG.IgnoreServerCertErrors = False
-        AddHandler LoadCompleted, AddressOf Logger.ClearMovie
         AddHandler Me.ListView1.DoubleClick, Sub(s, arg)
                                                  myOrbit.DumpAndSave(s.selecteditems(0).Tag, New IO.DirectoryInfo(Application.StartupPath))
                                              End Sub
+        InitFiddler()
     End Sub
 
     Private Sub FiddlerApplication_AfterSessionComplete(oSession As Fiddler.Session)
         Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), oSession))
     End Sub
-    'Private Sub FiddlerApplication_OnNotification(sender As Object, e As Fiddler.NotificationEventArgs)
-    '    Invoke(Sub() Logger.Push("** NotifyUser: " & Convert.ToString(e.NotifyString), e))
-    'End Sub
-    'Private Sub Log_OnLogString(sender As Object, e As Fiddler.LogEventArgs)
-    '    Invoke(Sub() Logger.Push("** LogString: " & Convert.ToString(e.LogString), e))
-    'End Sub
 
     Class Logger
 
@@ -29,6 +21,7 @@ Public Class Form1
         Shared Sub Push(value As String, sessionDescription As Object)
             log.Add(sessionDescription)
             Form1.ListBox1.SelectedIndex = Form1.ListBox1.Items.Add(value + vbCrLf)
+            Debug.Print(value)
         End Sub
 
         Shared filterOfMIME As New List(Of String) From {"|application/octet-stream|", "|[A-F0-9]{8}|", "video/mp4"}
@@ -59,11 +52,8 @@ Public Class Form1
                 Form1.Label1.Text = "Current Host: " & _c
             End Set
         End Property
-        Shared Sub ClearMovie()
-            Form1.ListView1.Items.Clear()
-        End Sub
     End Class
-    Private Sub InitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles InitToolStripMenuItem.Click
+    Private Sub InitFiddler()
         BrowserProxySetting.BrowserProxySetting.RefreshIESettings("127.0.0.1:9200")
         Fiddler.FiddlerApplication.Startup(9200, Fiddler.FiddlerCoreStartupFlags.CaptureLocalhostTraffic)
     End Sub
@@ -97,5 +87,9 @@ Public Class Form1
 
     Private Sub ToolStripTextBox1_Leave(sender As Object, e As EventArgs) Handles ToolStripTextBox1.Leave
         sender.Text = WebBrowser1.Url.AbsoluteUri
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Me.ListView1.Items.Clear()
     End Sub
 End Class

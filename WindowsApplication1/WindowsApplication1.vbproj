@@ -93,6 +93,12 @@
     <Compile Include="Dialog1.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Dump.Designer.vb">
+      <DependentUpon>Dump.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Dump.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -131,6 +137,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Dialog1.resx">
       <DependentUpon>Dialog1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dump.resx">
+      <DependentUpon>Dump.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>

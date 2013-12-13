@@ -5,28 +5,46 @@ Imports System.Reflection
 
 Module myOrbit
     Public Async Sub DumpAndSave(s As Session, dir As IO.DirectoryInfo)
-        Dim sugfn As String
         Dim t As String
-        If s.fullUrl.Contains("@"c) Or s.fullUrl.Contains("?"c) Then
-            t = s.fullUrl.Remove(s.fullUrl.IndexOfAny({"@"c, "?"c}))
-            t = t.Substring(t.LastIndexOf("/"c) + 1)
-        End If
-        If [String].IsNullOrEmpty(t) Then
-            sugfn = s.SuggestedFilename
-        ElseIf t <> s.SuggestedFilename Then
-            sugfn = t
-        End If
-        If sugfn Is Nothing Then sugfn = InputBox("Filename?")
-        Dim stream As IO.FileStream = IO.File.Create(dir.FullName & "\" & sugfn)
-        Dim writer As New IO.StreamWriter(stream)
-        writer.Write(s.responseBodyBytes)
-        Await writer.FlushAsync
-        writer.Dispose()
+        Using d As New Dump
+            d.Show()
+            Dim sugfn As String = String.Empty
+            If s.fullUrl.Contains("@"c) Or s.fullUrl.Contains("?"c) Then
+                t = s.fullUrl.Remove(s.fullUrl.IndexOfAny({"@"c, "?"c}))
+                t = t.Substring(t.LastIndexOf("/"c) + 1)
+            End If
+            If [String].IsNullOrEmpty(t) Then
+                sugfn = s.SuggestedFilename
+            ElseIf t <> s.SuggestedFilename Then
+                sugfn = t
+            End If
+            If sugfn Is Nothing Then sugfn = InputBox("Filename?")
+            d.Label1.Text = "Waiting for the end of stream..."
+            Await Task.Run(Function()
+                               Do Until s.state = SessionStates.Done
+                                   If s.state = SessionStates.Aborted Then Return -1
+                               Loop
+                               Return 0
+                           End Function)
+            d.Label1.Text = "Creating a file..."
+            Dim stream As IO.FileStream = IO.File.Create(dir.FullName & "\" & sugfn)
+            Dim writer As New IO.StreamWriter(stream)
+            d.Label1.Text = "Writing..."
+            writer.Write(s.responseBodyBytes)
+            Await writer.FlushAsync
+            writer.Dispose()
+        End Using
     End Sub
-    Public Async Sub DownloadSave(req As HttpWebRequest, filename As String)
-        Dim stream As IO.FileStream = IO.File.Create(filename)
+    Public Async Sub DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "")
         Dim r As HttpWebResponse = CType(Await req.GetResponseAsync, HttpWebResponse)
-        Using w As New IO.FileStream(filename, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
+
+        'TODO UI作成
+
+        If String.IsNullOrEmpty(filenamewithExt) Then
+            filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
+        End If
+        filenamewithExt = dir.FullName & "\" & filenamewithExt
+        Using w As New IO.FileStream(filenamewithExt, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
             Await r.GetResponseStream.CopyToAsync(w).ContinueWith(Sub() r.Close())
         End Using
     End Sub

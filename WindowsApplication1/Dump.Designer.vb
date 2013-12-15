@@ -22,9 +22,18 @@ Partial Class Dump
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Dim Timer1 As System.Windows.Forms.Timer
         Me.Label1 = New System.Windows.Forms.Label()
         Me.ProgressBar1 = New System.Windows.Forms.ProgressBar()
+        Me.Label2 = New System.Windows.Forms.Label()
+        Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
+        '
+        'Timer1
+        '
+        Timer1.Enabled = True
+        AddHandler Timer1.Tick, AddressOf Me.Timer1_Tick
         '
         'Label1
         '
@@ -44,12 +53,21 @@ Partial Class Dump
         Me.ProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee
         Me.ProgressBar1.TabIndex = 2
         '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(369, 11)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(0, 12)
+        Me.Label2.TabIndex = 4
+        '
         'Dump
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(432, 89)
         Me.ControlBox = False
+        Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.ProgressBar1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
@@ -62,4 +80,5 @@ Partial Class Dump
     End Sub
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents ProgressBar1 As System.Windows.Forms.ProgressBar
+    Friend WithEvents Label2 As System.Windows.Forms.Label
 End Class

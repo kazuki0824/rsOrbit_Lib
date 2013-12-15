@@ -2,6 +2,7 @@
 Imports Fiddler
 Imports System.Reactive.Linq
 Imports System.Reflection
+Imports AsynchronousExtensions
 
 Module myOrbit
     Public Async Sub DumpAndSave(s As Session, dir As IO.DirectoryInfo)
@@ -33,20 +34,48 @@ Module myOrbit
             writer.Write(s.responseBodyBytes)
             Await writer.FlushAsync
             writer.Dispose()
+            System.Diagnostics.Process.Start( _
+                "EXPLORER.EXE", "/select," + dir.FullName & "\" & sugfn)
         End Using
     End Sub
     Public Async Sub DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "")
-        Dim r As HttpWebResponse = CType(Await req.GetResponseAsync, HttpWebResponse)
-
-        'TODO UI作成
-
-        If String.IsNullOrEmpty(filenamewithExt) Then
-            filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
-        End If
-        filenamewithExt = dir.FullName & "\" & filenamewithExt
-        Using w As New IO.FileStream(filenamewithExt, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-            Await r.GetResponseStream.CopyToAsync(w).ContinueWith(Sub() r.Close())
-        End Using
+        Dim d As New Dump With {.Text = req.RequestUri.AbsoluteUri}
+        d.Label1.Text = "Downloading..."
+        d.Show() 'todo
+        req.DownloadDataAsyncWithProgress().Do(Sub(p)
+                                                   Dim s As String = String.Format("Downloading... {0}MB / {1}MB", Format(p.BytesReceived / 1000000, "0.000"), Format((p.TotalBytesToReceive) / 1000000, "0.000"))
+                                                   d.Invoke(Sub()
+                                                                d.Label1.Text = s
+                                                            End Sub)
+                                               End Sub).
+                                      Aggregate(New List(Of Byte),
+                                                Function(list, p)
+                                                    list.AddRange(p.Value)
+                                                    Return list
+                                                End Function).Subscribe(Async Sub(t)
+                                                                            If String.IsNullOrEmpty(filenamewithExt) Then
+                                                                                filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
+                                                                            ElseIf filenamewithExt.StartsWith("*.") AndAlso filenamewithExt.Substring(2) Like "???" Then
+                                                                                With IO.Path.GetInvalidPathChars.Aggregate(InputBox("filename?"), Function(s, c) s.Replace(c.ToString(), ""))
+                                                                                    If IO.Path.HasExtension(.Clone) Then
+                                                                                        filenamewithExt = IO.Path.ChangeExtension(.Clone, .Substring(.LastIndexOf("."c) + 1))
+                                                                                    Else
+                                                                                        filenamewithExt = .Clone
+                                                                                    End If
+                                                                                End With
+                                                                            End If
+                                                                            filenamewithExt = dir.FullName & "\" & filenamewithExt
+                                                                            d.Invoke(Sub()
+                                                                                         d.Label1.Text = "Writing..."
+                                                                                         d.ProgressBar1.Style = ProgressBarStyle.Marquee
+                                                                                     End Sub)
+                                                                            Using w As New IO.FileStream(filenamewithExt, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
+                                                                                Await w.WriteAsync(t.ToArray, 0, t.Count)
+                                                                            End Using
+                                                                            System.Diagnostics.Process.Start( _
+                                                                        "EXPLORER.EXE", "/select," + dir.FullName & "\" & filenamewithExt)
+                                                                            d.Close()
+                                                                        End Sub)
     End Sub
 
     Enum vServiceKind
@@ -79,7 +108,7 @@ Module myOrbit
         If (invoke Is Nothing) Then Exit Sub
         Dim t As Type = GetType(OrbitV)
         Dim returnValue As Object = t.InvokeMember(invoke, _
-          BindingFlags.InvokeMethod, _
+          BindingFlags.InvokeMethod Or BindingFlags.OptionalParamBinding, _
           Nothing, _
           Nothing, _
           New Object() {u})

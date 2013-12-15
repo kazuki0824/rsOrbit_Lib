@@ -1,6 +1,6 @@
 ﻿Module OrbitV
 #Region "ReflectionBlock"
-    Function Getniconico(url As String, Optional ByRef videoinfo As Dictionary(Of String, String) = Nothing) As SortedDictionary(Of Integer, Tuple(Of String, Uri, String))
+    Public Function Getniconico(url As String, Optional ByRef videoinfo As Dictionary(Of String, String) = Nothing) As SortedDictionary(Of Integer, Tuple(Of String, Uri, String))
         Dim u As New Uri(url)
         Dim nchs As Net.Cookie
         Dim player_raw As String = ""

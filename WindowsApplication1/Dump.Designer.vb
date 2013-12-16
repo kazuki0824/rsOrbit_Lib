@@ -71,6 +71,8 @@ Partial Class Dump
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.ProgressBar1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "Dump"
         Me.ShowIcon = False
         Me.Text = "Dump"

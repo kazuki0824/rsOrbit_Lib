@@ -12,6 +12,8 @@ Public Class Form1
     End Sub
 
     Private Sub FiddlerApplication_AfterSessionComplete(oSession As Fiddler.Session)
+        System.Diagnostics.Debug.WriteLine(String.Format("Session {0}({3}):HTTP {1} for {2}",
+                    oSession.id, oSession.responseCode, oSession.fullUrl, oSession.oResponse.MIMEType))
         Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), oSession))
     End Sub
 
@@ -23,19 +25,24 @@ Public Class Form1
             Form1.ListBox1.SelectedIndex = Form1.ListBox1.Items.Add(value + vbCrLf)
             Debug.Print(value)
         End Sub
-
-        Shared filterOfMIME As New List(Of String) From {"|application/octet-stream|", "|[A-F0-9]{8}|", "video/mp4"}
+        Shared ReadOnly filterOfMIME As New List(Of String) From {"|[A-F0-9]{8}|", "video/mp4", "video/mp2t"}
+        Shared ReadOnly filterOfMIME_streaming As New List(Of String) From {"|application/x-mpegURL|"}
         Shared Async Sub Parse(sender As Object, e As Specialized.NotifyCollectionChangedEventArgs) Handles log.CollectionChanged
             Dim mime As String = DirectCast(e.NewItems(0), Fiddler.Session).oResponse.MIMEType
-            For Each f As String In filterOfMIME
-                If Await Task.Run(Function()
-                                      Return Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|"))
-                                  End Function) Then Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url)) : Exit For
-            Next
+            Parallel.ForEach(filterOfMIME, Sub(f)
+                                               If Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|")) Then
+                                                   Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url))
+                                               End If
+                                           End Sub)
+            Parallel.ForEach(filterOfMIME_streaming, Sub(f)
+                                                         If Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|")) Then
+                                                             Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url, "Streaming"))
+                                                         End If
+                                                     End Sub)
         End Sub
         Shared Sub RegisterMovie(oSession As Fiddler.Session, WhereIsThis As Uri, Optional type As String = "Common")
             If type <> "Common" Then
-                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type}) With {.ForeColor = Color.Red, .Tag = oSession})
+                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type}) With {.ForeColor = Color.Green, .Tag = oSession})
                 item.EnsureVisible()
             Else
                 Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type}) With {.Tag = oSession})
@@ -54,12 +61,12 @@ Public Class Form1
         End Property
     End Class
     Private Sub InitFiddler()
-        BrowserProxySetting.BrowserProxySetting.RefreshIESettings("127.0.0.1:9200")
-        Fiddler.FiddlerApplication.Startup(9200, Fiddler.FiddlerCoreStartupFlags.CaptureLocalhostTraffic)
+        Fiddler.FiddlerApplication.Startup(0, Fiddler.FiddlerCoreStartupFlags.CaptureLocalhostTraffic Or Fiddler.FiddlerCoreStartupFlags.DecryptSSL)
+        Fiddler.URLMonInterop.SetProxyInProcess(String.Format("127.0.0.1:{0}", Fiddler.FiddlerApplication.oProxy.ListenPort), "<local>")
     End Sub
     Private Sub Shutdown() Handles Me.FormClosing
+        Fiddler.URLMonInterop.ResetProxyInProcessToDefault()
         Fiddler.FiddlerApplication.Shutdown()
-        BrowserProxySetting.BrowserProxySetting.RefreshIESettings("")
     End Sub
 
     Private Sub ListBox1_DoubleClick(sender As Object, e As EventArgs) Handles ListBox1.DoubleClick

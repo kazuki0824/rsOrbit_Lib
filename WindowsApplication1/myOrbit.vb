@@ -42,6 +42,7 @@ Module myOrbit
         Dim d As New Dump With {.Text = req.RequestUri.AbsoluteUri}
         d.Label1.Text = "Downloading..."
         d.Show() 'todo
+        d.RegisterCancellationToken( _
         req.DownloadDataAsyncWithProgress().Do(Sub(p)
                                                    Dim s As String = String.Format("Downloading... {0}MB / {1}MB", Format(p.BytesReceived / 1000000, "0.000"), Format((p.TotalBytesToReceive) / 1000000, "0.000"))
                                                    d.Invoke(Sub()
@@ -74,8 +75,9 @@ Module myOrbit
                                                                             End Using
                                                                             System.Diagnostics.Process.Start( _
                                                                         "EXPLORER.EXE", "/select," + dir.FullName & "\" & filenamewithExt)
-                                                                            d.Close()
-                                                                        End Sub)
+                                                                            d.BeginInvoke(Sub() d.Close())
+                                                                        End Sub) _
+                                                                    )
     End Sub
 
     Enum vServiceKind

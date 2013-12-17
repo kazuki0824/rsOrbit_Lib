@@ -38,7 +38,7 @@ Module myOrbit
                 "EXPLORER.EXE", "/select," + dir.FullName & "\" & sugfn)
         End Using
     End Sub
-    Public Async Sub DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "")
+    Public Sub DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "")
         Dim d As New Dump With {.Text = req.RequestUri.AbsoluteUri}
         d.Label1.Text = "Downloading..."
         d.Show() 'todo
@@ -58,10 +58,10 @@ Module myOrbit
                                                                                 filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
                                                                             ElseIf filenamewithExt.StartsWith("*.") AndAlso filenamewithExt.Substring(2) Like "???" Then
                                                                                 With IO.Path.GetInvalidPathChars.Aggregate(InputBox("filename?"), Function(s, c) s.Replace(c.ToString(), ""))
-                                                                                    If IO.Path.HasExtension(.Clone) Then
-                                                                                        filenamewithExt = IO.Path.ChangeExtension(.Clone, .Substring(.LastIndexOf("."c) + 1))
+                                                                                    If IO.Path.HasExtension(.Normalize) Then
+                                                                                        filenamewithExt = IO.Path.ChangeExtension(.Normalize, .Substring(.LastIndexOf("."c) + 1))
                                                                                     Else
-                                                                                        filenamewithExt = .Clone
+                                                                                        filenamewithExt = .Normalize
                                                                                     End If
                                                                                 End With
                                                                             End If

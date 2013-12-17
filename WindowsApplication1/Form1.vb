@@ -27,25 +27,25 @@ Public Class Form1
         End Sub
         Shared ReadOnly filterOfMIME As New List(Of String) From {"|[A-F0-9]{8}|", "video/mp4", "video/mp2t"}
         Shared ReadOnly filterOfMIME_streaming As New List(Of String) From {"|application/x-mpegURL|"}
-        Shared Async Sub Parse(sender As Object, e As Specialized.NotifyCollectionChangedEventArgs) Handles log.CollectionChanged
+        Shared Sub Parse(sender As Object, e As Specialized.NotifyCollectionChangedEventArgs) Handles log.CollectionChanged
             Dim mime As String = DirectCast(e.NewItems(0), Fiddler.Session).oResponse.MIMEType
             Parallel.ForEach(filterOfMIME, Sub(f)
                                                If Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|")) Then
-                                                   Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url))
+                                                   Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url, mime))
                                                End If
                                            End Sub)
             Parallel.ForEach(filterOfMIME_streaming, Sub(f)
                                                          If Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|")) Then
-                                                             Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url, "Streaming"))
+                                                             Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url, mime, "Streaming"))
                                                          End If
                                                      End Sub)
         End Sub
-        Shared Sub RegisterMovie(oSession As Fiddler.Session, WhereIsThis As Uri, Optional type As String = "Common")
+        Shared Sub RegisterMovie(oSession As Fiddler.Session, WhereIsThis As Uri, Optional MIMEtype As String = "(null)", Optional type As String = "Common")
             If type <> "Common" Then
-                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type}) With {.ForeColor = Color.Green, .Tag = oSession})
+                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type, MIMEtype}) With {.ForeColor = Color.Green, .Tag = oSession})
                 item.EnsureVisible()
             Else
-                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type}) With {.Tag = oSession})
+                Dim item As ListViewItem = Form1.ListView1.Items.Add(New ListViewItem({CStr(Form1.ListView1.Items.Count), oSession.oRequest.headers.UriScheme, oSession.oRequest.headers.RequestPath, type, MIMEtype}) With {.Tag = oSession})
                 item.EnsureVisible()
             End If
         End Sub
@@ -75,12 +75,15 @@ Public Class Form1
         End Using
     End Sub
 
+    ReadOnly DefaultTabIndexDefinition As New Dictionary(Of String, Integer) From {{"www.youtube.com", 1}}
     Private Sub WebBrowser1_DocumentCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles WebBrowser1.DocumentCompleted
         If sender.Url = e.Url Then
             If Logger.CurrentHost <> e.Url.Host Then Logger.CurrentHost = e.Url.Host
             ToolStripTextBox1.Text = DirectCast(sender.Url, Uri).AbsoluteUri
             RaiseEvent LoadCompleted(sender, e)
         End If
+        Dim index As Integer = 0
+        If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then Me.TabControl1.SelectedIndex = index
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
 

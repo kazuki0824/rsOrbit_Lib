@@ -1,4 +1,4 @@
- <Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
 Partial Class Form1
     Inherits System.Windows.Forms.Form
 
@@ -73,7 +73,7 @@ Partial Class Form1
         Me.WebBrowser1.Size = New System.Drawing.Size(995, 432)
         Me.WebBrowser1.TabIndex = 0
         Me.WebBrowser1.Url = New System.Uri("http://youtube.com", System.UriKind.Absolute)
-        Me.WebBrowser.ScriptErrorSuppressed = True
+        Me.WebBrowser1.ScriptErrorsSuppressed = True
         '
         'SplitContainer1
         '

@@ -1,4 +1,4 @@
-﻿Imports System.Net
+ Imports System.Net
 Imports Fiddler
 Imports System.Reactive.Linq
 Imports System.Reflection
@@ -27,13 +27,10 @@ Module myOrbit
                                Loop
                                Return 0
                            End Function)
-            d.Label1.Text = "Creating a file..."
-            Dim stream As IO.FileStream = IO.File.Create(dir.FullName & "\" & sugfn)
-            Dim writer As New IO.StreamWriter(stream)
-            d.Label1.Text = "Writing..."
-            writer.Write(s.responseBodyBytes)
-            Await writer.FlushAsync
-            writer.Dispose()
+            s.utilDecodeResponse()
+            d.Label1.Text = "Writing to a file..."
+         Await Task.Run(Sub() IO.File.WriteAllBytes(dir.FullName & "\" & sugfn,s.responseBodyBytes))
+            d.Label1.Text = "Launching explorer..."
             System.Diagnostics.Process.Start( _
                 "EXPLORER.EXE", "/select," + dir.FullName & "\" & sugfn)
         End Using

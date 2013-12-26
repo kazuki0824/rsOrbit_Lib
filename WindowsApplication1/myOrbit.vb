@@ -29,7 +29,6 @@ Module myOrbit
                            End Function)
             s.utilDecodeResponse()
             d.Label1.Text = "Writing to a file..."
-            s.isFlagSet(SessionFlags.ResponseStreamed)
             Await Task.Run(Sub() IO.File.WriteAllBytes(dir.FullName & "\" & sugfn, s.responseBodyBytes))
             d.Label1.Text = "Launching explorer..."
             System.Diagnostics.Process.Start( _

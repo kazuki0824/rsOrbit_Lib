@@ -67,9 +67,7 @@ Module myOrbit
                                                                                          d.Label1.Text = "Writing..."
                                                                                          d.ProgressBar1.Style = ProgressBarStyle.Marquee
                                                                                      End Sub)
-                                                                            Using w As New IO.FileStream(filenamewithExt, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.Read)
-                                                                                Await w.WriteAsync(t.ToArray, 0, t.Count)
-                                                                            End Using
+                                                                            Await Task.Run(Sub() IO.File.WriteAllBytes(filenamewithExt, t.ToArray))
                                                                             System.Diagnostics.Process.Start( _
                                                                         "EXPLORER.EXE", "/select," + dir.FullName & "\" & filenamewithExt)
                                                                             d.BeginInvoke(Sub() d.Close())

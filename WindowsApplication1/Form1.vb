@@ -3,8 +3,9 @@
 Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        AddHandler Fiddler.FiddlerApplication.BeforeResponse, AddressOf FiddlerApplication_AfterSessionComplete
+        AddHandler Fiddler.FiddlerApplication.ResponseHeadersAvailable, AddressOf FiddlerApplication_AfterSessionComplete
         Fiddler.CONFIG.IgnoreServerCertErrors = True
+        Fiddler.CONFIG.bStreamAudioVideo = True
         AddHandler Me.ListView1.DoubleClick, Sub(s, arg)
                                                  myOrbit.DumpAndSave(s.selecteditems(0).Tag, New IO.DirectoryInfo(Application.StartupPath))
                                              End Sub

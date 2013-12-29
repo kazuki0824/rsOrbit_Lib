@@ -27,5 +27,17 @@
         Next
         Return newdict
     End Function
+    Const dm_reflimit As Int32 = 300
+    Public Function GetDailymotion()
+        Dim dmVideoPattern As String = ""
+
+        Dim fiddlerPattern As IEnumerable(Of Fiddler.Session) = Form1.Logger.log _
+                                                                .Reverse _
+                                                                .TakeWhile(Function(item As Fiddler.Session, i As Int32) As Boolean
+                                                                               Return i < dm_reflimit AndAlso (item.fullUrl Like dmVideoPattern)
+                                                                           End Function) _
+                                                                       .Reverse
+
+    End Function
 #End Region
 End Module

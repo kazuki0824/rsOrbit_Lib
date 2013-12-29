@@ -25,6 +25,7 @@ Partial Class Dialog1
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.PropertyGrid1 = New System.Windows.Forms.PropertyGrid()
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -34,6 +35,7 @@ Partial Class Dialog1
         Me.TableLayoutPanel1.ColumnCount = 2
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
+        Me.TableLayoutPanel1.Controls.Add(Me.Button1, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 1, 0)
         Me.TableLayoutPanel1.Location = New System.Drawing.Point(295, 322)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
@@ -61,6 +63,16 @@ Partial Class Dialog1
         Me.PropertyGrid1.Size = New System.Drawing.Size(426, 304)
         Me.PropertyGrid1.TabIndex = 1
         '
+        'Button1
+        '
+        Me.Button1.Anchor = System.Windows.Forms.AnchorStyles.None
+        Me.Button1.Location = New System.Drawing.Point(3, 3)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(67, 21)
+        Me.Button1.TabIndex = 2
+        Me.Button1.Text = "Refresh"
+        Me.Button1.UseVisualStyleBackColor = True
+        '
         'Dialog1
         '
         Me.AcceptButton = Me.OK_Button
@@ -83,5 +95,6 @@ Partial Class Dialog1
     Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents PropertyGrid1 As System.Windows.Forms.PropertyGrid
+    Friend WithEvents Button1 As System.Windows.Forms.Button
 
 End Class

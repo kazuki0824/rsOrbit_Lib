@@ -15,7 +15,7 @@ Public Class Form1
     Private Sub FiddlerApplication_AfterSessionComplete(oSession As Fiddler.Session)
         System.Diagnostics.Debug.WriteLine(String.Format("Session {0}({3}):HTTP {1} for {2}",
                     oSession.id, oSession.responseCode, oSession.fullUrl, oSession.oResponse.MIMEType))
-        Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), oSession))
+        Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), {oSession, oSession.oRequest, oSession.oResponse}))
     End Sub
 
     Class Logger
@@ -83,8 +83,12 @@ Public Class Form1
             ToolStripTextBox1.Text = DirectCast(sender.Url, Uri).AbsoluteUri
             RaiseEvent LoadCompleted(sender, e)
         End If
-        Dim index As Integer = 0
-        If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then Me.TabControl1.SelectedIndex = index
+        Dim index As Integer = -1
+        If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then
+            Me.TabControl1.SelectedIndex = index
+        Else
+            Me.TabControl1.SelectedIndex = 0
+        End If
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
 

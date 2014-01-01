@@ -1,4 +1,4 @@
- Imports System.Net
+Imports System.Net
 Imports Fiddler
 Imports System.Reactive.Linq
 Imports System.Reflection
@@ -74,7 +74,12 @@ Module myOrbit
                                                                         End Sub) _
                                                                     )
     End Sub
-
+    Function getFiddlerLog() As ObjectModel.ObservableCollection(Of Fiddler.Session)
+        Return Form1.Logger.log
+    End Function
+    ''' <summary>
+    ''' Parser
+    ''' </summary>
     Enum vServiceKind
         No
         Niconico
@@ -84,8 +89,12 @@ Module myOrbit
         Anitube
         Youku
         Pandoratv
+        Dailymotion
     End Enum
-    Dim reflectionTarget As New Hashtable From {{vServiceKind.Youtube, "GetYoutube"}, {vServiceKind.Niconico, "Getniconico"}}
+    ''' <summary>
+    ''' The reflection target
+    ''' </summary>
+    Dim reflectionTarget As New Hashtable From {{vServiceKind.Youtube, "GetYoutube"}, {vServiceKind.Niconico, "Getniconico"}, {vServiceKind.Dailymotion, "Dailymotion"}}
     Public Function UsingParserCk(u As String) As vServiceKind
         Dim attribute As vServiceKind
         If (Evaluation(u, "http://(www\.)?youtube\.com/watch\?.*", evalStrategy.RegularExpression)) OrElse Evaluation(u, "http://youtu\.be/\w+") Then
@@ -94,6 +103,8 @@ Module myOrbit
             attribute = vServiceKind.Niconico
         ElseIf Evaluation(u, "(?<=http://v.youku.com/v_show/id_)\w+(?=\.html)", evalStrategy.RegularExpression) Then
             attribute = vServiceKind.Youku
+        ElseIf Evaluation(u, "http://www.dailymotion.com/*ideo/*", evalStrategy.WildCard) Then
+            attribute = vServiceKind.Dailymotion
         Else
             attribute = vServiceKind.No
         End If
@@ -101,15 +112,25 @@ Module myOrbit
     End Function
 
     Public Sub UsingParserMain(u As String)
-        Dim invoke As String = reflectionTarget(UsingParserCk(u))
+        Dim invoke As String = CStr(reflectionTarget(UsingParserCk(u)))
         If (invoke Is Nothing) Then Exit Sub
         Dim t As Type = GetType(OrbitV)
         Dim returnValue As Object = t.InvokeMember(invoke, _
-          BindingFlags.InvokeMethod Or BindingFlags.OptionalParamBinding, _
-          Nothing, _
-          Nothing, _
-          New Object() {u})
-        Dim c As New UserControl1(returnValue) With {.Dock = DockStyle.Fill}
+            BindingFlags.InvokeMethod Or BindingFlags.OptionalParamBinding, _
+            Nothing, _
+            Nothing, _
+            New Object() {u})
+        Static c As Control : If (Not c Is Nothing) AndAlso (Not c.IsDisposed) Then c.Dispose()
+        Select Case True
+            Case returnValue.GetType.Name.Contains("Dictionary")
+                c = New UserControl1 _
+                    (New SortedDictionary(Of Integer, Tuple(Of String, Uri, String)) _
+                     (CType(returnValue, Dictionary(Of Integer, Tuple(Of String, Uri, String))))) With
+                 {.Dock = DockStyle.Fill}
+                returnValue = Nothing
+            Case returnValue.GetType Is GetType(Control) 'for dailymotion
+                c = returnValue
+        End Select
         With Form1.TabPage2.Controls
             .Clear()
             .Add(c)

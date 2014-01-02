@@ -22,4 +22,7 @@ Public Class Dialog1
     End Sub
 
 
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        PropertyGrid1.Refresh()
+    End Sub
 End Class

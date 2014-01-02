@@ -3,6 +3,7 @@ Imports Fiddler
 Imports System.Reactive.Linq
 Imports System.Reflection
 Imports AsynchronousExtensions
+Imports System.Collections.ObjectModel
 
 Module myOrbit
     Public Async Sub DumpAndSave(s As Session, dir As IO.DirectoryInfo)
@@ -19,7 +20,7 @@ Module myOrbit
             ElseIf t <> s.SuggestedFilename Then
                 sugfn = t
             End If
-            If sugfn Is Nothing Then sugfn = InputBox("Filename?")
+            If sugfn Is Nothing OrElse sugfn.Contains(".txt") Then sugfn = InputBox("Filename?")
             d.Label1.Text = "Waiting for the end of stream..."
             Await Task.Run(Function()
                                Do Until s.state = SessionStates.Done
@@ -28,8 +29,12 @@ Module myOrbit
                                Return 0
                            End Function)
             s.utilDecodeResponse()
+            d.Label1.Text = "Check existense """ + dir.FullName + """..."
+            If Not dir.Exists Then MsgBox("1")
             d.Label1.Text = "Writing to a file..."
-            Await Task.Run(Sub() IO.File.WriteAllBytes(dir.FullName & "\" & sugfn, s.responseBodyBytes))
+            Using resource As New IO.FileStream((dir.FullName & "\" & sugfn).Normalize, IO.FileMode.CreateNew, IO.FileAccess.Write, IO.FileShare.Write, 8, True)
+                Await resource.WriteAsync(s.ResponseBody)
+            End Using
             d.Label1.Text = "Launching explorer..."
             System.Diagnostics.Process.Start( _
                 "EXPLORER.EXE", "/select," + dir.FullName & "\" & sugfn)
@@ -73,12 +78,15 @@ Module myOrbit
                                                                             d.BeginInvoke(Sub() d.Close())
                                                                         End Sub))
     End Sub
+<<<<<<< HEAD
     Function getFiddlerLog() As IEnumerable(Of Fiddler.Session)
         Return Form1.Logger.log.Select(Of Fiddler.Session)(Function(a, b) a(0))
     End Function
     ''' <summary>
     ''' Parser
     ''' </summary>
+=======
+>>>>>>> remotes/origin/master
     Enum vServiceKind
         No
         Niconico

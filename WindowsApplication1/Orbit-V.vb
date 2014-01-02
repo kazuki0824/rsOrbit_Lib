@@ -32,6 +32,7 @@ Module OrbitV
         Next
         Return newdict
     End Function
+<<<<<<< HEAD
     Private Const _dmCountLimit As Int32 = 300
     Private Const _dmUriPattern As String = ""
     <FiddlerLogAccess>
@@ -72,6 +73,20 @@ Module OrbitV
 
     End Function
     ReadOnly qList As New List(Of String) From {"stream_h264_hd1080_url", "stream_h264_hq_url", "stream_h264_hd_url", "stream_h264_url", "stream_h264_ld_url"}
+=======
+    Const dm_reflimit As Int32 = 300
+    Public Function GetDailymotion()
+        Dim dmVideoPattern As String = ""
+
+        Dim fiddlerPattern As IEnumerable(Of Fiddler.Session) = Form1.Logger.log _
+                                                                .Reverse _
+                                                                .TakeWhile(Function(item As Fiddler.Session, i As Int32) As Boolean
+                                                                               Return i < dm_reflimit AndAlso (item.fullUrl Like dmVideoPattern)
+                                                                           End Function) _
+                                                                       .Reverse
+
+    End Function
+>>>>>>> remotes/origin/master
 #End Region
     Class FiddlerLogAccessAttribute
         Inherits Attribute

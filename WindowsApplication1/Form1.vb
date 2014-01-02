@@ -83,8 +83,12 @@ Public Class Form1
             ToolStripTextBox1.Text = DirectCast(sender.Url, Uri).AbsoluteUri
             RaiseEvent LoadCompleted(sender, e)
         End If
-        Dim index As Integer = 0
-        If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then Me.TabControl1.SelectedIndex = index
+        Dim index As Integer = -1
+        If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then
+            Me.TabControl1.SelectedIndex = index
+        Else
+            Me.TabControl1.SelectedIndex = 0
+        End If
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
     Private Sub SetName(sender, e) Handles Me.LoadCompleted

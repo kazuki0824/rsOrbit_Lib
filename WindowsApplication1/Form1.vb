@@ -15,12 +15,12 @@ Public Class Form1
     Private Sub FiddlerApplication_AfterSessionComplete(oSession As Fiddler.Session)
         System.Diagnostics.Debug.WriteLine(String.Format("Session {0}({3}):HTTP {1} for {2}",
                     oSession.id, oSession.responseCode, oSession.fullUrl, oSession.oResponse.MIMEType))
-        Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), oSession))
+        Invoke(Sub() Logger.Push(String.Format("{0}:HTTP {1} for {2}", oSession.id, oSession.responseCode, oSession.fullUrl), {oSession, oSession.oRequest, oSession.oResponse}))
     End Sub
 
     Class Logger
 
-        Public Shared WithEvents log As New ObservableCollection(Of Fiddler.Session)
+        Public Shared WithEvents log As New ObservableCollection(Of Object)
         Shared Sub Push(value As String, sessionDescription As Object)
             log.Add(sessionDescription)
             Form1.ListBox1.SelectedIndex = Form1.ListBox1.Items.Add(value + vbCrLf)
@@ -29,7 +29,7 @@ Public Class Form1
         Shared ReadOnly filterOfMIME As New List(Of String) From {"|[A-F0-9]{8}|", "video/mp4", "video/mp2t"}
         Shared ReadOnly filterOfMIME_streaming As New List(Of String) From {"|application/x-mpegURL|"}
         Shared Sub Parse(sender As Object, e As Specialized.NotifyCollectionChangedEventArgs) Handles log.CollectionChanged
-            Dim mime As String = DirectCast(e.NewItems(0), Fiddler.Session).oResponse.MIMEType
+            Dim mime As String = DirectCast(e.NewItems(0)(0), Fiddler.Session).oResponse.MIMEType
             Parallel.ForEach(filterOfMIME, Sub(f)
                                                If Evaluation(mime, f, strategy:=f.StartsWith("|") AndAlso f.EndsWith("|")) Then
                                                    Form1.Invoke(Sub() RegisterMovie(DirectCast(e.NewItems(0), Fiddler.Session), Form1.WebBrowser1.Url, mime))
@@ -87,7 +87,9 @@ Public Class Form1
         If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then Me.TabControl1.SelectedIndex = index
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
-
+    Private Sub SetName(sender, e) Handles Me.LoadCompleted
+        Me.Text = DirectCast(sender, WebBrowser).DocumentTitle
+    End Sub
     Sub Parse(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles Me.LoadCompleted
         myOrbit.UsingParserMain(e.Url.AbsoluteUri)
     End Sub

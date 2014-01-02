@@ -71,11 +71,10 @@ Module myOrbit
                                                                             System.Diagnostics.Process.Start( _
                                                                         "EXPLORER.EXE", "/select," + dir.FullName & "\" & filenamewithExt)
                                                                             d.BeginInvoke(Sub() d.Close())
-                                                                        End Sub) _
-                                                                    )
+                                                                        End Sub))
     End Sub
-    Function getFiddlerLog() As ObjectModel.ObservableCollection(Of Fiddler.Session)
-        Return Form1.Logger.log
+    Function getFiddlerLog() As IEnumerable(Of Fiddler.Session)
+        Return Form1.Logger.log.Select(Of Fiddler.Session)(Function(a, b) a(0))
     End Function
     ''' <summary>
     ''' Parser

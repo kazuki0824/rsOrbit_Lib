@@ -118,6 +118,7 @@
       <DependentUpon>Form1.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="get_icon.vb" />
     <Compile Include="kk_movDlForUser.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -137,6 +138,11 @@
     <Compile Include="myOrbit.vb" />
     <Compile Include="n_getflv.vb" />
     <Compile Include="Orbit-V.vb" />
+    <Compile Include="Resource1.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
     <Compile Include="UserControl1.Designer.vb">
       <DependentUpon>UserControl1.vb</DependentUpon>
     </Compile>
@@ -161,6 +167,11 @@
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resource1.resx">
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.vb</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserControl1.resx">
       <DependentUpon>UserControl1.vb</DependentUpon>
     </EmbeddedResource>
@@ -181,6 +192,9 @@
   <ItemGroup>
     <Content Include="FiddlerCore4.dll" />
     <Content Include="FiddlerCore4.XML" />
+    <None Include="Resources\109_AllAnnotations_Help_16x16_72.png" />
+    <None Include="Resources\109_AllAnnotations_Info_24x24_72.png" />
+    <None Include="Resources\Image1.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\rs-bright-wpf\kkAsync\kkAsync.csproj">

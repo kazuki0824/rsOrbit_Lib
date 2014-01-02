@@ -92,7 +92,7 @@ Public Class Form1
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
     Private Sub SetName(sender, e) Handles Me.LoadCompleted
-        Me.Text = DirectCast(sender, WebBrowser).DocumentTitle
+        Me.Text = DirectCast(sender, WebBrowser).DocumentTitle & " - RS-Orbit"
     End Sub
     Sub Parse(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles Me.LoadCompleted
         myOrbit.UsingParserMain(e.Url.AbsoluteUri)

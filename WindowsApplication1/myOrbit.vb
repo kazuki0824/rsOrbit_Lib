@@ -78,15 +78,12 @@ Module myOrbit
                                                                             d.BeginInvoke(Sub() d.Close())
                                                                         End Sub))
     End Sub
-<<<<<<< HEAD
     Function getFiddlerLog() As IEnumerable(Of Fiddler.Session)
         Return Form1.Logger.log.Select(Of Fiddler.Session)(Function(a, b) a(0))
     End Function
     ''' <summary>
     ''' Parser
     ''' </summary>
-=======
->>>>>>> remotes/origin/master
     Enum vServiceKind
         No
         Niconico

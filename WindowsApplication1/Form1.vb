@@ -78,7 +78,7 @@ Public Class Form1
 
     ReadOnly DefaultTabIndexDefinition As New Dictionary(Of String, Integer) From {{"www.youtube.com", 1}}
     Private Sub WebBrowser1_DocumentCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles WebBrowser1.DocumentCompleted
-        If sender.Url = e.Url Then
+        If CType(sender.Url, Uri) = e.Url Then
             If Logger.CurrentHost <> e.Url.Host Then Logger.CurrentHost = e.Url.Host
             ToolStripTextBox1.Text = DirectCast(sender.Url, Uri).AbsoluteUri
             RaiseEvent LoadCompleted(sender, e)

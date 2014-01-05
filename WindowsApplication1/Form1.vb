@@ -3,9 +3,6 @@
 Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        AddHandler Fiddler.FiddlerApplication.ResponseHeadersAvailable, AddressOf FiddlerApplication_AfterSessionComplete
-        Fiddler.CONFIG.IgnoreServerCertErrors = True
-        Fiddler.CONFIG.bStreamAudioVideo = True
         AddHandler Me.ListView1.DoubleClick, Sub(s, arg)
                                                  myOrbit.DumpAndSave(s.selecteditems(0).Tag, New IO.DirectoryInfo(Application.StartupPath))
                                              End Sub
@@ -62,6 +59,9 @@ Public Class Form1
         End Property
     End Class
     Private Sub InitFiddler()
+        AddHandler Fiddler.FiddlerApplication.ResponseHeadersAvailable, AddressOf FiddlerApplication_AfterSessionComplete
+        Fiddler.CONFIG.IgnoreServerCertErrors = True
+        Fiddler.CONFIG.bStreamAudioVideo = True
         Fiddler.FiddlerApplication.Startup(0, Fiddler.FiddlerCoreStartupFlags.CaptureLocalhostTraffic Or Fiddler.FiddlerCoreStartupFlags.DecryptSSL)
         Fiddler.URLMonInterop.SetProxyInProcess(String.Format("127.0.0.1:{0}", Fiddler.FiddlerApplication.oProxy.ListenPort), "<local>")
     End Sub

@@ -1,27 +1,31 @@
 ﻿Imports System
-Imports System.Resources
 Imports System.Reflection
+Imports System.Runtime.InteropServices
 
 ' アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 ' アセンブリに関連付けられている情報を変更するには、
 ' これらの属性値を変更してください。
 
-' アセンブリ属性の値を確認します
+' アセンブリ属性の値を確認します。
 
-<Assembly: AssemblyTitle("LibOrbit_a")> 
+<Assembly: AssemblyTitle("LibOrbit_a2")> 
 <Assembly: AssemblyDescription("")> 
 <Assembly: AssemblyCompany("")> 
-<Assembly: AssemblyProduct("LibOrbit_a")> 
-<Assembly: AssemblyCopyright("Copyright (C)  2014")> 
+<Assembly: AssemblyProduct("LibOrbit_a2")> 
+<Assembly: AssemblyCopyright("Copyright ©  2014")> 
 <Assembly: AssemblyTrademark("")> 
-<Assembly: NeutralResourcesLanguage("ja")>
+
+<Assembly: ComVisible(False)>
+
+'このプロジェクトが COM に公開される場合、次の GUID がタイプ ライブラリの ID になります。
+<Assembly: Guid("5277bd5b-d84d-411a-9bea-2d0313f1e29e")> 
 
 ' アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 '
-'      メジャー バージョン
-'      マイナー バージョン 
-'      ビルド番号
-'      リビジョン
+'      Major Version
+'      Minor Version 
+'      Build Number
+'      Revision
 '
 ' すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 ' 既定値にすることができます:

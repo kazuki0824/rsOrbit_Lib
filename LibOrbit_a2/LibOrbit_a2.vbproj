@@ -122,7 +122,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="utilFiddlerCtrl.vb" />
+    <Compile Include="Utility\utilFiddlerCtrl.vb" />
     <Compile Include="Utility\EvalTool.vb" />
     <Compile Include="ViewUi.Designer.vb">
       <DependentUpon>ViewUi.vb</DependentUpon>

@@ -3,14 +3,13 @@ Imports Fiddler
 Imports System.Reflection
 Imports AsynchronousExtensions
 Imports System.Reactive.Linq
-Imports System.Collections.ObjectModel
 
 Module myOrbit
-    Public Async Sub DumpAndSave(s As Session, dir As IO.DirectoryInfo)
+    Public Async Function DumpAndSave(s As Session) As Task(Of Tuple(Of String, IO.MemoryStream))
         Dim t As String
+        Dim sugfn As String = String.Empty
         Using d As New Dump
             d.Show()
-            Dim sugfn As String = String.Empty
             If s.fullUrl.Contains("@"c) Or s.fullUrl.Contains("?"c) Then
                 t = s.fullUrl.Remove(s.fullUrl.IndexOfAny({"@"c, "?"c}))
                 t = t.Substring(t.LastIndexOf("/"c) + 1)
@@ -29,18 +28,10 @@ Module myOrbit
                                Return 0
                            End Function)
             s.utilDecodeResponse()
-            d.Label1.Text = "Check existense """ + dir.FullName + """..."
-            If Not dir.Exists Then MsgBox("1")
-            d.Label1.Text = "Writing to a file..."
-            Using streamobj As New IO.FileStream((dir.FullName & "\" & sugfn).Normalize, IO.FileMode.CreateNew, IO.FileAccess.Write, IO.FileShare.Write, 8, True)
-                Await streamobj.WriteAsync(s.ResponseBody)
-            End Using
-            d.Label1.Text = "Launching explorer..."
-            System.Diagnostics.Process.Start( _
-                "EXPLORER.EXE", "/select," + dir.FullName & "\" & sugfn)
         End Using
-    End Sub
-    Public Sub DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "")
+        Return tuple.Create(sugfn, New IO.MemoryStream(s.ResponseBody))
+    End Function
+    Public Async Function DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "") As Task(Of Tuple(Of String, MemoryStream))
         Dim d As New Dump With {.Text = req.RequestUri.AbsoluteUri}
         d.Label1.Text = "Downloading..."
         d.Show() 'todo
@@ -55,7 +46,7 @@ Module myOrbit
                                                 Function(list, p)
                                                     list.AddRange(p.Value)
                                                     Return list
-                                                End Function).Subscribe(Async Sub(t)
+                                                End Function).Subscribe(Sub(t)
                                                                             If String.IsNullOrEmpty(filenamewithExt) Then
                                                                                 filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
                                                                             ElseIf filenamewithExt.StartsWith("*.") AndAlso filenamewithExt.Substring(2) Like "???" Then
@@ -72,12 +63,17 @@ Module myOrbit
                                                                                          d.Label1.Text = "Writing..."
                                                                                          d.ProgressBar1.Style = ProgressBarStyle.Marquee
                                                                                      End Sub)
-                                                                            Await Task.Run(Sub() IO.File.WriteAllBytes(filenamewithExt, t.ToArray))
-                                                                            System.Diagnostics.Process.Start( _
-                                                                        "EXPLORER.EXE", "/select," + dir.FullName & "\" & filenamewithExt)
+                                                                            d.Tag = New IO.MemoryStream(t.ToArray)
                                                                             d.BeginInvoke(Sub() d.Close())
                                                                         End Sub))
-    End Sub
+        Await Task.Run(Sub()
+                           While d.Tag Is Nothing
+
+                           End While
+                       End Sub)
+        Return New Tuple(Of String, MemoryStream)(filenamewithExt, d.Tag)
+
+    End Function
     Function getFiddlerLog() As IEnumerable(Of Fiddler.Session)
         Return utilFiddlerCtrl.Logger.log.Select(Of Fiddler.Session)(Function(a, b) a(0))
     End Function
@@ -124,16 +120,13 @@ Module myOrbit
             Nothing, _
             Nothing, _
             New Object() {u})
-        Static c As Control : If Not (Not c Is Nothing) AndAlso (Not c.IsDisposed) Then c = New ListView
         Select Case True
             Case returnValue.GetType.Name.Contains("Dictionary")
-                c = New ViewUi _
-                    (New SortedDictionary(Of Integer, Tuple(Of String, Uri, String)) _
-                     (CType(returnValue, Dictionary(Of Integer, Tuple(Of String, Uri, String))))) With
-                 {.Dock = DockStyle.Fill}
+                Return (New SortedDictionary(Of Integer, Tuple(Of String, Uri, String)) _
+                     (CType(returnValue, Dictionary(Of Integer, Tuple(Of String, Uri, String)))))
                 returnValue = Nothing
-            Case returnValue.GetType Is GetType(Control) 'for dailymotion
-                c = returnValue
+                '    Case returnValue.GetType Is GetType(Control)
+                '        c = returnValue
         End Select
     End Function
 End Module

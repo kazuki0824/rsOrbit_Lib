@@ -8,7 +8,7 @@ Module utilFiddlerCtrl
     End Sub
 
     Class Logger
-        Public Shared recognizedList As New ListView
+        Friend Shared RecognizedList As New ListView
         Protected Friend Shared WithEvents log As New ObservableCollection(Of Object)
         Shared Sub Push(value As String, sessionDescription As Object)
             log.Add(sessionDescription)

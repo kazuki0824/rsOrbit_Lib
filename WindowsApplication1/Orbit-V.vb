@@ -67,7 +67,7 @@ Module OrbitV
         Dim ind As Integer = -1
         Return rList.ToDictionary(Of Integer)(Function(item)
                                                   ind += 1
-                                                  Return ind + 1
+                                                  Return ind
                                               End Function)
 
     End Function

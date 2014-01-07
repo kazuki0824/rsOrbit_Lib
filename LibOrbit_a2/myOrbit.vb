@@ -31,49 +31,6 @@ Module myOrbit
         End Using
         Return tuple.Create(sugfn, New IO.MemoryStream(s.ResponseBody))
     End Function
-    Public Async Function DownloadSave(req As HttpWebRequest, dir As IO.DirectoryInfo, Optional filenamewithExt As String = "") As Task(Of Tuple(Of String, MemoryStream))
-        Dim d As New Dump With {.Text = req.RequestUri.AbsoluteUri}
-        d.Label1.Text = "Downloading..."
-        d.Show() 'todo
-        d.RegisterCancellationToken( _
-        req.DownloadDataAsyncWithProgress().Do(Sub(p)
-                                                   Dim s As String = String.Format("Downloading... {0}MB / {1}MB", Format(p.BytesReceived / 1000000, "0.000"), Format((p.TotalBytesToReceive) / 1000000, "0.000"))
-                                                   d.Invoke(Sub()
-                                                                d.Label1.Text = s
-                                                            End Sub)
-                                               End Sub).
-                                      Aggregate(New List(Of Byte),
-                                                Function(list, p)
-                                                    list.AddRange(p.Value)
-                                                    Return list
-                                                End Function).Subscribe(Sub(t)
-                                                                            If String.IsNullOrEmpty(filenamewithExt) Then
-                                                                                filenamewithExt = DateTime.Now.ToString("yyyyMMddhhmmss") & ".flv"
-                                                                            ElseIf filenamewithExt.StartsWith("*.") AndAlso filenamewithExt.Substring(2) Like "???" Then
-                                                                                With IO.Path.GetInvalidPathChars.Aggregate(InputBox("filename?"), Function(s, c) s.Replace(c.ToString(), ""))
-                                                                                    If IO.Path.HasExtension(.Normalize) Then
-                                                                                        filenamewithExt = IO.Path.ChangeExtension(.Normalize, .Substring(.LastIndexOf("."c) + 1))
-                                                                                    Else
-                                                                                        filenamewithExt = .Normalize
-                                                                                    End If
-                                                                                End With
-                                                                            End If
-                                                                            filenamewithExt = dir.FullName & "\" & filenamewithExt
-                                                                            d.Invoke(Sub()
-                                                                                         d.Label1.Text = "Writing..."
-                                                                                         d.ProgressBar1.Style = ProgressBarStyle.Marquee
-                                                                                     End Sub)
-                                                                            d.Tag = New IO.MemoryStream(t.ToArray)
-                                                                            d.BeginInvoke(Sub() d.Close())
-                                                                        End Sub))
-        Await Task.Run(Sub()
-                           While d.Tag Is Nothing
-
-                           End While
-                       End Sub)
-        Return New Tuple(Of String, MemoryStream)(filenamewithExt, d.Tag)
-
-    End Function
     Function getFiddlerLog() As IEnumerable(Of Fiddler.Session)
         Return utilFiddlerCtrl.Logger.log.Select(Of Fiddler.Session)(Function(a, b) a(0))
     End Function
@@ -95,7 +52,7 @@ Module myOrbit
     ''' The reflection target
     ''' </summary>
     Dim reflectionTarget As New Hashtable From {{vServiceKind.Youtube, "GetYoutube"}, {vServiceKind.Niconico, "Getniconico"}, {vServiceKind.Dailymotion, "Dailymotion"}}
-    Public Function UsingParserCk(u As String) As vServiceKind
+    Friend Function UsingParserCk(u As String) As vServiceKind
         Dim attribute As vServiceKind
         If (Evaluation(u, "http://(www\.)?youtube\.com/watch\?.*", evalStrategy.RegularExpression)) OrElse Evaluation(u, "http://youtu\.be/\w+") Then
             attribute = vServiceKind.Youtube
@@ -111,7 +68,14 @@ Module myOrbit
         Return attribute
     End Function
 
-    Public Function UsingParserMain(u As String)
+    ''' <summary>
+    ''' Usings the parser main.
+    ''' </summary>
+    ''' <param name="u">動画のURL.</param>
+    ''' <returns>
+    ''' 0から始まるインデックス.(有効な場合は画質番号.) 順に[ファイル名],[URI],[Cookie].
+    ''' </returns>
+    Public Function UsingParserMain(u As String) As SortedDictionary(Of Integer, Tuple(Of String, Uri, String))
         Dim invoke As String = CStr(reflectionTarget(UsingParserCk(u)))
         If (invoke Is Nothing) Then Return Nothing
         Dim t As Type = GetType(OrbitV)
@@ -124,9 +88,6 @@ Module myOrbit
             Case returnValue.GetType.Name.Contains("Dictionary")
                 Return (New SortedDictionary(Of Integer, Tuple(Of String, Uri, String)) _
                      (CType(returnValue, Dictionary(Of Integer, Tuple(Of String, Uri, String)))))
-                returnValue = Nothing
-                '    Case returnValue.GetType Is GetType(Control)
-                '        c = returnValue
         End Select
     End Function
 End Module

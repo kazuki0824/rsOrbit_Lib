@@ -20,15 +20,11 @@ Public Class ViewUi
         Me.ListView1.LargeImageList = i
         Me.ListView1.SmallImageList = i
     End Sub
-
+    Event DownloadRequestedByUser(sender As ListViewItem, e As Tuple(Of String, Uri, String))
     Private Sub ListView1_DoubleClick(sender As Object, e As EventArgs) Handles ListView1.DoubleClick
+        On Error GoTo e
         Dim tag As Tuple(Of String, Uri, String) = DirectCast(sender, ListView).SelectedItems(0).Tag
-        Dim src As Uri = tag.Item2
-        Dim w As Net.HttpWebRequest = Net.WebRequest.CreateHttp(src)
-        With w
-            .AllowAutoRedirect = True
-            .Headers.Add(Net.HttpRequestHeader.Cookie, tag.Item3)
-        End With
-        myOrbit.DownloadSave(w, New IO.DirectoryInfo(Application.StartupPath))
+        RaiseEvent DownloadRequestedByUser(sender.SelectedItems(0), tag)
+e:      Return
     End Sub
 End Class

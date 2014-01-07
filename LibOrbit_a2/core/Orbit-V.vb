@@ -42,8 +42,13 @@ Module OrbitV
         '        TakeWhile(Function(item, i) i < _dmCountLimit AndAlso item.fullUrl Like _dmUriPattern).
         '        Reverse
         'End With
-        Dim m As String
-        Dim req As HttpWebRequest = WebRequest.CreateHttp(url.Replace("/video/", "/embed/video/"))
+        Dim m As String = url
+
+        If Evaluation(m, "http://www.dailymotion.com/video/???????_*") Then
+            m = m.Substring(0, m.IndexOf("_"c))
+        End If
+        m.Remove(m.IndexOf("_"c))
+        Dim req As HttpWebRequest = WebRequest.CreateHttp(m.Replace("/video/", "/embed/video/"))
         With req.GetResponse()
             Using r As New StreamReader(.GetResponseStream)
                 m = r.ReadToEnd
@@ -67,7 +72,7 @@ Module OrbitV
         Dim ind As Integer = -1
         Return rList.ToDictionary(Of Integer)(Function(item)
                                                   ind += 1
-                                                  Return ind + 1
+                                                  Return ind
                                               End Function)
 
     End Function

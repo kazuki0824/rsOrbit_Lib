@@ -131,7 +131,6 @@ Module myOrbit
                     (New SortedDictionary(Of Integer, Tuple(Of String, Uri, String)) _
                      (CType(returnValue, Dictionary(Of Integer, Tuple(Of String, Uri, String))))) With
                  {.Dock = DockStyle.Fill}
-                returnValue = Nothing
             Case returnValue.GetType Is GetType(Control) 'for dailymotion
                 c = returnValue
         End Select

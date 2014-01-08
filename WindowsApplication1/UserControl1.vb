@@ -7,7 +7,7 @@
         ' InitializeComponent() 呼び出しの後で初期化を追加します。
         Dim i As New ImageList
         For Each t As KeyValuePair(Of Integer, Tuple(Of String, Uri, String)) In items
-            ListView1.Items.Add(New ListViewItem({CStr(t.Key), t.Value.Item1, t.Value.Item2.AbsoluteUri, t.Value.Item3}) With {.Tag = t.Value})
+            ListView1.Items.Add(New ListViewItem({CStr(t.Key), t.Value.Item1, t.Value.Item2.AbsoluteUri, t.Value.Item3}) With {.Tag = t.Value}).EnsureVisible()
             Dim img As Icon = Shellmgr.GetExtensionIcon(Me.Handle, "." & IO.Path.GetExtension(t.Value.Item1))
             If img Is Nothing Then
                 img = Icon.FromHandle(My.Resources.Resource1._109_AllAnnotations_Help_16x16_72.GetHicon)

@@ -86,8 +86,6 @@ Public Class Form1
         Dim index As Integer = -1
         If DefaultTabIndexDefinition.TryGetValue(e.Url.Host, index) Then
             Me.TabControl1.SelectedIndex = index
-        Else
-            Me.TabControl1.SelectedIndex = 0
         End If
     End Sub
     Event LoadCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs)
